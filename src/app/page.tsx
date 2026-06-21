@@ -43,7 +43,13 @@ export default function WeatherPage() {
   const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* Load saved cities */
-  useEffect(() => { setSavedCities(loadSavedCities()); }, []);
+  useEffect(() => {
+    const cities = loadSavedCities();
+    const t = setTimeout(() => {
+      setSavedCities(cities);
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
   /* Clock */
   useEffect(() => {
@@ -58,7 +64,12 @@ export default function WeatherPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && isMinTimeElapsed) setShowSplash(false);
+    if (!loading && isMinTimeElapsed) {
+      const t = setTimeout(() => {
+        setShowSplash(false);
+      }, 0);
+      return () => clearTimeout(t);
+    }
   }, [loading, isMinTimeElapsed]);
 
   /* Auto-refresh every 5 min */
@@ -289,7 +300,7 @@ function LocationsView({ savedCities, onSelect, onRemove }: { savedCities: Saved
           <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">Cari kota lalu tekan ★ untuk menyimpannya</p>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
           <AnimatePresence>
             {savedCities.map((city) => (
               <motion.div key={city.name} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} layout
@@ -322,7 +333,7 @@ function SettingsView({ settings, update }: { settings: AppSettings; update: Upd
         <p className="text-slate-500 font-bold tracking-[0.2em] text-xs">KONFIGURASI DASHBOARD ANDA</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl">
 
         <SettingsCard icon={<Thermometer className="w-5 h-5" />} label="Satuan Suhu" description="Tampilan suhu di seluruh dashboard">
           <SegmentControl

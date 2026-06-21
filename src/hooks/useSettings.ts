@@ -46,7 +46,11 @@ export function useSettings() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULTS);
 
   useEffect(() => {
-    setSettings(load());
+    const loaded = load();
+    const t = setTimeout(() => {
+      setSettings(loaded);
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   const update = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
