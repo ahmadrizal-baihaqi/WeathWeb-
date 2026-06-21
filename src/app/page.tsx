@@ -322,9 +322,8 @@ function SettingsView({ settings, update }: { settings: AppSettings; update: Upd
         <p className="text-slate-500 font-bold tracking-[0.2em] text-xs">KONFIGURASI DASHBOARD ANDA</p>
       </div>
 
-      <div className="flex flex-col gap-4 max-w-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
 
-        {/* ── Satuan Suhu ── */}
         <SettingsCard icon={<Thermometer className="w-5 h-5" />} label="Satuan Suhu" description="Tampilan suhu di seluruh dashboard">
           <SegmentControl
             options={[{ label: '°C Celsius', value: 'celsius' }, { label: '°F Fahrenheit', value: 'fahrenheit' }]}
@@ -333,7 +332,6 @@ function SettingsView({ settings, update }: { settings: AppSettings; update: Upd
           />
         </SettingsCard>
 
-        {/* ── Satuan Angin ── */}
         <SettingsCard icon={<Wind className="w-5 h-5" />} label="Satuan Kecepatan Angin" description="Satuan kecepatan angin yang ditampilkan">
           <SegmentControl
             options={[{ label: 'km/h', value: 'kmh' }, { label: 'm/s', value: 'ms' }, { label: 'mph', value: 'mph' }]}
@@ -342,7 +340,6 @@ function SettingsView({ settings, update }: { settings: AppSettings; update: Upd
           />
         </SettingsCard>
 
-        {/* ── Format Jam ── */}
         <SettingsCard icon={<Clock className="w-5 h-5" />} label="Format Jam" description="Format tampilan waktu di header">
           <SegmentControl
             options={[{ label: '24 Jam', value: '24h' }, { label: '12 Jam (AM/PM)', value: '12h' }]}
@@ -351,44 +348,43 @@ function SettingsView({ settings, update }: { settings: AppSettings; update: Upd
           />
         </SettingsCard>
 
-        {/* ── Cinematic Mode ── */}
         <SettingsCard icon={<Clapperboard className="w-5 h-5" />} label="Mode Cinematic" description="Animasi orbs latar belakang yang bergerak">
           <Toggle value={settings.cinematicMode} onChange={(v) => update('cinematicMode', v)} />
         </SettingsCard>
 
-        {/* ── Auto Refresh ── */}
         <SettingsCard icon={<RefreshCw className="w-5 h-5" />} label="Refresh Otomatis" description="Perbarui data cuaca setiap 5 menit">
           <Toggle value={settings.autoRefresh} onChange={(v) => update('autoRefresh', v)} />
         </SettingsCard>
 
-        {/* ── Tampilkan Feels Like ── */}
         <SettingsCard icon={<Gauge className="w-5 h-5" />} label="Tampilkan Terasa Seperti" description="Suhu feels-like di bawah suhu utama">
           <Toggle value={settings.showFeelsLike} onChange={(v) => update('showFeelsLike', v)} />
         </SettingsCard>
 
-        {/* ── Tampilan Ringkas ── */}
         <SettingsCard icon={<LayoutList className="w-5 h-5" />} label="Tampilan Kondisi Ringkas" description="Menyembunyikan label dan sub-teks di kartu kondisi">
           <Toggle value={settings.compactConditions} onChange={(v) => update('compactConditions', v)} />
         </SettingsCard>
 
-        {/* ── Reset ── */}
-        <div className="mt-4">
-          <button
-            onClick={() => {
-              update('tempUnit', 'celsius');
-              update('windUnit', 'kmh');
-              update('timeFormat', '24h');
-              update('cinematicMode', true);
-              update('autoRefresh', false);
-              update('showFeelsLike', true);
-              update('compactConditions', false);
-            }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-white/10 text-slate-500 hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/5 transition-all text-xs font-black uppercase tracking-widest"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Reset ke Default
-          </button>
-        </div>
+        {/* Reset tile */}
+        <button
+          onClick={() => {
+            update('tempUnit', 'celsius');
+            update('windUnit', 'kmh');
+            update('timeFormat', '24h');
+            update('cinematicMode', true);
+            update('autoRefresh', false);
+            update('showFeelsLike', true);
+            update('compactConditions', false);
+          }}
+          className="glass p-6 rounded-[2rem] flex flex-col gap-3 text-left hover:bg-red-400/5 hover:border-red-400/20 border border-white/5 transition-all group"
+        >
+          <div className="p-2 bg-red-500/10 rounded-xl text-red-400 w-fit">
+            <SlidersHorizontal className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-black uppercase tracking-widest text-sm text-slate-400 group-hover:text-red-400 transition-colors">Reset ke Default</span>
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">Kembalikan semua pengaturan</span>
+          </div>
+        </button>
 
       </div>
     </motion.div>
@@ -397,17 +393,18 @@ function SettingsView({ settings, update }: { settings: AppSettings; update: Upd
 
 /* ─── Settings Sub-components ─── */
 
+
 function SettingsCard({ icon, label, description, children }: { icon: React.ReactNode; label: string; description: string; children: React.ReactNode }) {
   return (
-    <div className="glass p-5 rounded-3xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div className="flex items-center gap-4">
+    <div className="glass p-6 rounded-[2rem] flex flex-col gap-4 border border-white/5">
+      <div className="flex items-center gap-3">
         <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400 flex-shrink-0">{icon}</div>
         <div className="flex flex-col">
           <span className="font-black uppercase tracking-widest text-sm text-white">{label}</span>
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{description}</span>
         </div>
       </div>
-      <div className="flex-shrink-0">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
