@@ -40,7 +40,16 @@ export default function WeatherPage() {
   const [showSplash, setShowSplash] = useState(true);
   const [isMinTimeElapsed, setIsMinTimeElapsed] = useState(false);
   const [savedCities, setSavedCities] = useState<SavedCity[]>([]);
+  const [mounted, setMounted] = useState(false);
   const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /* Set mounted state */
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
   /* Load saved cities */
   useEffect(() => {
@@ -167,10 +176,10 @@ export default function WeatherPage() {
 
                 <div className="mt-6 flex flex-col">
                   <span className="text-6xl font-black tracking-tighter text-glow tabular-nums">
-                    {formatTime(currentTime)}
+                    {mounted ? formatTime(currentTime) : '--:--:--'}
                   </span>
                   <span className="text-sm font-bold text-slate-400 uppercase tracking-[0.3em] mt-1 pl-1">
-                    {formatDate(currentTime)}
+                    {mounted ? formatDate(currentTime) : 'LOKASI WAKTU'}
                   </span>
                   {weather?.tzId && (
                     <span className="text-[10px] font-mono text-slate-600 mt-1 pl-1 tracking-widest">
