@@ -11,11 +11,11 @@ Rencana kerja ini mencakup implementasi fitur pembaruan pada Weather App:
 WEB (Next.js 16 + Tailwind CSS + Framer Motion)
 
 ## Kriteria Keberhasilan
-- [ ] Splash screen loading menampilkan animasi SVG garis awan berjalan (animated path) dan teks kecil "menghubungkan ke satelit...".
-- [ ] Scroll berjalan mulus (60fps) dengan penerapan GPU acceleration (`will-change`, `transform-gpu`) dan optimasi filter blur.
-- [ ] Jam di dashboard utama otomatis menyesuaikan waktu lokal kota hasil pencarian (menggunakan zona waktu `tz_id` dari API).
-- [ ] Pengguna bisa menyimpan (menambahkan) kota aktif ke dalam "Lokasi Disimpan" melalui tombol bintang di Header, serta menghapusnya melalui tombol hapus (trash/silang) di menu lokasi.
-- [ ] Menu Alerts (Peringatan) dihapus sepenuhnya dari navigasi samping (`SideNav.tsx`) dan routing.
+- [x] Splash screen loading menampilkan animasi SVG garis awan berjalan (animated path) dan teks kecil "menghubungkan ke satelit...".
+- [x] Scroll berjalan mulus (60fps) dengan penerapan GPU acceleration (`will-change`, `transform-gpu`) dan optimasi filter blur.
+- [x] Jam di dashboard utama otomatis menyesuaikan waktu lokal kota hasil pencarian (menggunakan zona waktu `tz_id` dari API).
+- [x] Pengguna bisa menyimpan (menambahkan) kota aktif ke dalam "Lokasi Disimpan" melalui tombol bintang di Header, serta menghapusnya melalui tombol hapus (trash/silang) di menu lokasi.
+- [x] Menu Alerts (Peringatan) dihapus sepenuhnya dari navigasi samping (`SideNav.tsx`) dan routing.
 
 ## Stack Teknologi
 - **Next.js 16 (App Router)**
@@ -90,14 +90,14 @@ WEB (Next.js 16 + Tailwind CSS + Framer Motion)
 ---
 
 ## Verifikasi Akhir (Phase X)
-- [ ] Jam bekerja realtime sinkron dengan zona waktu kota yang dicari.
-- [ ] Fitur simpan/hapus kota favorit berjalan di localStorage.
-- [ ] Scroll lancar tanpa frame drop.
-- [ ] `npm run build` sukses.
-- [ ] Skrip validasi `checklist.py` berhasil dijalankan.
+- [x] Jam bekerja realtime sinkron dengan zona waktu kota yang dicari.
+- [x] Fitur simpan/hapus kota favorit berjalan di localStorage.
+- [x] Scroll lancar tanpa frame drop.
+- [x] `npm run build` sukses.
+- [x] Skrip validasi `checklist.py` berhasil dijalankan.
 
 ## ✅ PHASE X COMPLETE
-- Lint: [ ]
-- Security: [ ]
-- Build: [ ]
-- Date: [Belum selesai]
+- Lint: [x] Passed
+- Security: [x] Passed
+- Build: [x] Passed
+- Date: [2026-06-21]
