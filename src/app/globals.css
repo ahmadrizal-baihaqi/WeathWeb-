@@ -28,17 +28,21 @@ body {
 @layer utilities {
   .glass {
     background: var(--color-glass-white);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: var(--shadow-glass);
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
   
   .glass-dark {
     background: var(--color-glass-dark);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.05);
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
 
   .text-glow {

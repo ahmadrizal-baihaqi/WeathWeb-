@@ -16,8 +16,9 @@ export function useWeather(initialCity: string = "Jakarta") {
     try {
       const data = await getWeatherData(query);
       setWeather(data);
-    } catch (err: any) {
-      setError(err.message || "Gagal mengambil data cuaca");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Gagal mengambil data cuaca";
+      setError(errorMessage);
       console.error(err);
     } finally {
       setLoading(false);

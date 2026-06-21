@@ -1,5 +1,26 @@
 import { WeatherData, ForecastDay, HourlyData } from "@/types/weather";
 
+interface APIDay {
+  date: string;
+  day: {
+    maxtemp_c: number;
+    mintemp_c: number;
+    condition: {
+      text: string;
+      icon: string;
+    };
+  };
+}
+
+interface APIHour {
+  time: string;
+  temp_c: number;
+  condition: {
+    text: string;
+    icon: string;
+  };
+}
+
 const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 const BASE_URL = "https://api.weatherapi.com/v1";
 
@@ -40,7 +61,9 @@ export async function getWeatherData(query: string): Promise<WeatherData> {
         { date: "Rab", maxTemp: 30, minTemp: 24, condition: "Hujan", icon: "rain" },
         { date: "Kam", maxTemp: 31, minTemp: 25, condition: "Berawan", icon: "cloudy" },
       ],
-      hourly: mockHourly
+      hourly: mockHourly,
+      region: mockCity === "Bandung" ? "Jawa Barat" : mockCity === "Surabaya" ? "Jawa Timur" : mockCity === "Bali" ? "Denpasar" : "DKI Jakarta",
+      tzId: "Asia/Jakarta"
     };
   }
 
@@ -51,7 +74,7 @@ export async function getWeatherData(query: string): Promise<WeatherData> {
 
     if (!res.ok) throw new Error(data.error?.message || "Gagal mengambil data cuaca");
 
-    const forecast: ForecastDay[] = data.forecast.forecastday.map((day: any) => ({
+    const forecast: ForecastDay[] = data.forecast.forecastday.map((day: APIDay) => ({
       date: new Date(day.date).toLocaleDateString('id-ID', { weekday: 'short' }),
       maxTemp: Math.round(day.day.maxtemp_c),
       minTemp: Math.round(day.day.mintemp_c),
@@ -59,7 +82,7 @@ export async function getWeatherData(query: string): Promise<WeatherData> {
       icon: day.day.condition.icon
     }));
 
-    const hourly: HourlyData[] = data.forecast.forecastday[0].hour.map((h: any) => ({
+    const hourly: HourlyData[] = data.forecast.forecastday[0].hour.map((h: APIHour) => ({
       time: h.time.split(' ')[1],
       temp: Math.round(h.temp_c),
       condition: h.condition.text,
@@ -82,7 +105,9 @@ export async function getWeatherData(query: string): Promise<WeatherData> {
       feelsLike: Math.round(data.current.feelslike_c),
       icon: data.current.condition.icon,
       forecast: forecast,
-      hourly: hourly
+      hourly: hourly,
+      region: data.location.region,
+      tzId: data.location.tz_id
     };
   } catch (error) {
     console.error("Error fetching weather:", error);

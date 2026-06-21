@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ForecastDay } from '@/types/weather';
-import { Cloud, Sun, CloudRain, CloudLightning, CloudDrizzle } from 'lucide-react';
+import { Cloud, Sun, CloudRain } from 'lucide-react';
 
 interface ForecastListProps {
   forecast: ForecastDay[];

@@ -30,4 +30,6 @@ export interface WeatherData {
   icon: string;
   forecast: ForecastDay[];
   hourly: HourlyData[];
+  region: string;
+  tzId: string;
 }

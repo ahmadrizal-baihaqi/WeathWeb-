@@ -8,20 +8,16 @@ interface SkyBackgroundProps {
 }
 
 export default function SkyBackground({ condition }: SkyBackgroundProps) {
-  const [gradient, setGradient] = useState("from-slate-950 via-slate-900 to-black");
+  const lowerCondition = condition.toLowerCase();
+  let gradient = "from-slate-900/30 via-slate-950 to-black";
 
-  useEffect(() => {
-    const lowerCondition = condition.toLowerCase();
-    if (lowerCondition.includes("sun") || lowerCondition.includes("clear")) {
-      setGradient("from-blue-600/20 via-slate-950 to-black");
-    } else if (lowerCondition.includes("cloud")) {
-      setGradient("from-blue-900/30 via-slate-950 to-black");
-    } else if (lowerCondition.includes("rain") || lowerCondition.includes("drizzle")) {
-      setGradient("from-indigo-950/40 via-slate-950 to-black");
-    } else {
-      setGradient("from-slate-900/30 via-slate-950 to-black");
-    }
-  }, [condition]);
+  if (lowerCondition.includes("sun") || lowerCondition.includes("clear")) {
+    gradient = "from-blue-600/20 via-slate-950 to-black";
+  } else if (lowerCondition.includes("cloud")) {
+    gradient = "from-blue-900/30 via-slate-950 to-black";
+  } else if (lowerCondition.includes("rain") || lowerCondition.includes("drizzle")) {
+    gradient = "from-slate-900/40 via-slate-950 to-black";
+  }
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden bg-black">
@@ -48,7 +44,8 @@ export default function SkyBackground({ condition }: SkyBackgroundProps) {
           y: [0, -30, 0]
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-        className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-500/20 blur-[120px] rounded-full"
+        style={{ willChange: "transform, opacity" }}
+        className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-500/20 blur-[120px] rounded-full transform-gpu"
       />
       <motion.div 
         animate={{ 
@@ -58,7 +55,8 @@ export default function SkyBackground({ condition }: SkyBackgroundProps) {
           y: [0, 40, 0]
         }}
         transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 blur-[100px] rounded-full"
+        style={{ willChange: "transform, opacity" }}
+        className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[100px] rounded-full transform-gpu"
       />
     </div>
   );

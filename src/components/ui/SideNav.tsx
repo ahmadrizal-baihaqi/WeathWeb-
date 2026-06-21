@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { LayoutGrid, MapPin, Bell, Crosshair, Settings, User } from 'lucide-react';
+import { LayoutGrid, MapPin, Crosshair, Settings, User } from 'lucide-react';
 import { useState } from 'react';
 
 interface SideNavProps {
@@ -14,10 +14,9 @@ export default function SideNav({ onDetectLocation, onNavigate }: SideNavProps) 
 
   const menuItems = [
     { id: 'dashboard', icon: LayoutGrid, label: 'Dashboard' },
-    { id: 'locations', icon: MapPin, label: 'Locations' },
-    { id: 'alerts', icon: Bell, label: 'Alerts' },
-    { id: 'locate', icon: Crosshair, label: 'Locate', action: onDetectLocation },
-    { id: 'settings', icon: Settings, label: 'Settings' },
+    { id: 'locations', icon: MapPin, label: 'Lokasi' },
+    { id: 'locate', icon: Crosshair, label: 'Deteksi Lokasi', action: onDetectLocation },
+    { id: 'settings', icon: Settings, label: 'Pengaturan' },
   ];
 
   return (
@@ -45,7 +44,7 @@ export default function SideNav({ onDetectLocation, onNavigate }: SideNavProps) 
             <item.icon className="w-6 h-6" />
             
             {/* Tooltip */}
-            <span className="absolute right-full mr-4 px-2 py-1 rounded bg-slate-800 text-white text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+            <span className="absolute right-full mr-4 px-2 py-1 rounded bg-slate-800 text-white text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap">
               {item.label}
             </span>
 
@@ -60,7 +59,7 @@ export default function SideNav({ onDetectLocation, onNavigate }: SideNavProps) 
       </nav>
 
       <div className="mt-auto">
-         {/* Unit Switcher or Profile toggle could go here */}
+         {/* Footer space */}
       </div>
     </aside>
   );

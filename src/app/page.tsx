@@ -1,8 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { Search, MapPin, Wind, Droplets, Sun, Eye, CloudRain, Clock, Calendar, AlertTriangle, Settings, Heart } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Search, Wind, Droplets, Sun, Eye, CloudRain, Star, Trash2, LucideIcon } from 'lucide-react';
 import { useWeather } from '@/hooks/useWeather';
 import SkyBackground from '@/components/effects/SkyBackground';
 import SideNav from '@/components/ui/SideNav';
@@ -10,39 +10,109 @@ import HourlyChart from '@/components/weather/HourlyChart';
 import ForecastList from '@/components/weather/ForecastList';
 import SplashScreen from '@/components/ui/SplashScreen';
 
+const SAVED_CITIES_KEY = 'skycast_saved_cities';
+
+interface SavedCity {
+  name: string;
+  region: string;
+}
+
+function loadSavedCities(): SavedCity[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(SAVED_CITIES_KEY);
+    return raw ? (JSON.parse(raw) as SavedCity[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistCities(cities: SavedCity[]) {
+  localStorage.setItem(SAVED_CITIES_KEY, JSON.stringify(cities));
+}
+
 export default function WeatherPage() {
-  const { weather, loading, error, fetchWeather, detectLocation } = useWeather("Jakarta");
+  const { weather, loading, fetchWeather, detectLocation } = useWeather('Jakarta');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeView, setActiveView] = useState('dashboard');
   const [showSplash, setShowSplash] = useState(true);
+  const [isMinTimeElapsed, setIsMinTimeElapsed] = useState(false);
+  const [savedCities, setSavedCities] = useState<SavedCity[]>([]);
 
+  // Load saved cities from localStorage on mount
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    setSavedCities(loadSavedCities());
+  }, []);
+
+  // Clock ticking — timezone-aware when weather data is available
+  useEffect(() => {
+    const tick = () => {
+      setCurrentTime(new Date());
+    };
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Minimum splash duration
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMinTimeElapsed(true), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Dismiss splash when data loaded + min time elapsed
+  useEffect(() => {
+    if (!loading && isMinTimeElapsed) {
+      setShowSplash(false);
+    }
+  }, [loading, isMinTimeElapsed]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const searchCity = formData.get('city') as string;
-    if (searchCity) {
-      fetchWeather(searchCity);
+    if (searchCity.trim()) {
+      fetchWeather(searchCity.trim());
       setActiveView('dashboard');
+      e.currentTarget.reset();
     }
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  // Format time in the timezone of the searched city
+  const formatTime = useCallback((date: Date) => {
+    const tz = weather?.tzId || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return date.toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: tz });
+  }, [weather?.tzId]);
+
+  const formatDate = useCallback((date: Date) => {
+    const tz = weather?.tzId || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return date.toLocaleDateString('id-ID', { weekday: 'long', month: 'short', day: '2-digit', timeZone: tz });
+  }, [weather?.tzId]);
+
+  // Check if current city is already saved
+  const isCitySaved = weather ? savedCities.some(c => c.name.toLowerCase() === weather.city.toLowerCase()) : false;
+
+  const toggleSaveCity = () => {
+    if (!weather) return;
+    let updated: SavedCity[];
+    if (isCitySaved) {
+      updated = savedCities.filter(c => c.name.toLowerCase() !== weather.city.toLowerCase());
+    } else {
+      updated = [...savedCities, { name: weather.city, region: weather.region }];
+    }
+    setSavedCities(updated);
+    persistCities(updated);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('id-ID', { weekday: 'short', month: 'short', day: '2-digit' });
+  const removeCity = (cityName: string) => {
+    const updated = savedCities.filter(c => c.name.toLowerCase() !== cityName.toLowerCase());
+    setSavedCities(updated);
+    persistCities(updated);
   };
 
   return (
     <>
       <AnimatePresence>
-        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+        {showSplash && <SplashScreen />}
       </AnimatePresence>
 
       <div className="flex bg-slate-950 min-h-screen text-white overflow-hidden font-sans">
@@ -51,7 +121,7 @@ export default function WeatherPage() {
 
         {/* Main Content */}
         <main className="flex-1 relative pr-20 h-screen overflow-hidden">
-          <SkyBackground condition={weather?.condition || "clear"} />
+          <SkyBackground condition={weather?.condition || 'clear'} />
           
           <div className="relative z-10 p-6 md:p-10 h-full flex flex-col gap-6 overflow-y-auto no-scrollbar">
             
@@ -62,22 +132,39 @@ export default function WeatherPage() {
                 animate={{ x: 0, opacity: 1 }}
                 className="flex flex-col"
               >
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-3 mb-1">
                   <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">
-                    {weather?.city}, {weather?.country}
+                    {weather?.city}{weather?.country ? `, ${weather.country}` : ''}
                   </h2>
+                  {/* Star / Save Button */}
+                  <button
+                    onClick={toggleSaveCity}
+                    title={isCitySaved ? 'Hapus dari simpanan' : 'Simpan kota ini'}
+                    className={`p-1.5 rounded-xl transition-all ${isCitySaved ? 'text-yellow-400 hover:text-yellow-300' : 'text-slate-600 hover:text-slate-400'}`}
+                  >
+                    <Star className={`w-5 h-5 ${isCitySaved ? 'fill-yellow-400' : ''}`} />
+                  </button>
                 </div>
-                <div className="flex items-center gap-4 text-slate-500 font-mono text-xs">
-                  <span>{weather?.lat}° N, {weather?.lon}° E</span>
+
+                {weather?.region && (
+                  <div className="text-slate-500 font-mono text-xs mb-1">{weather.region}</div>
+                )}
+                <div className="flex items-center gap-4 text-slate-600 font-mono text-xs">
+                  <span>{weather?.lat?.toFixed(2)}° N, {weather?.lon?.toFixed(2)}° E</span>
                 </div>
                 
                 <div className="mt-6 flex flex-col">
-                  <span className="text-6xl font-black tracking-tighter text-glow">
+                  <span className="text-6xl font-black tracking-tighter text-glow tabular-nums">
                     {formatTime(currentTime)}
                   </span>
                   <span className="text-sm font-bold text-slate-400 uppercase tracking-[0.3em] mt-1 pl-1">
-                    {formatDate(currentTime)} 2026
+                    {formatDate(currentTime)}
                   </span>
+                  {weather?.tzId && (
+                    <span className="text-[10px] font-mono text-slate-600 mt-1 pl-1 tracking-widest">
+                      {weather.tzId.replace('_', ' ')}
+                    </span>
+                  )}
                 </div>
               </motion.div>
 
@@ -92,7 +179,7 @@ export default function WeatherPage() {
                   <input 
                     name="city"
                     type="text" 
-                    placeholder="Cari Kota (Jakarta, Bandung...)" 
+                    placeholder="Cari Kota (Jakarta, Tokyo...)" 
                     className="bg-transparent border-none outline-none w-full text-base text-white placeholder:text-slate-500"
                   />
                 </div>
@@ -116,15 +203,15 @@ export default function WeatherPage() {
                       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent z-0" />
                       
                       <div className="relative z-10 flex flex-col items-center">
-                         <span className="text-[10rem] md:text-[13rem] font-black text-white text-glow leading-none flex items-start -ml-4">
-                           {weather?.temp}
+                         <span className="text-[10rem] md:text-[13rem] font-black text-white text-glow leading-none flex items-start -ml-4 tabular-nums">
+                           {weather?.temp ?? '--'}
                            <span className="text-3xl text-slate-400 mt-10 ml-2">°C</span>
                          </span>
                          
                          <div className="mt-4 flex flex-col items-center gap-4">
                             <motion.div
                                animate={{ y: [0, -10, 0] }}
-                               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                             >
                                <Sun className="w-16 h-16 text-white relative z-10 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
                             </motion.div>
@@ -140,11 +227,11 @@ export default function WeatherPage() {
                     <div className="w-full lg:w-72 glass p-8 rounded-[3rem] flex flex-col gap-6">
                       <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Kondisi</h3>
                       <div className="flex flex-col gap-5">
-                        <ConditionItem icon={Wind} label="Angin" value={`${weather?.windSpeed} km/h`} sub="BL" />
-                        <ConditionItem icon={Droplets} label="Kelembaban" value={`${weather?.humidity}%`} sub="" />
-                        <ConditionItem icon={Sun} label="Indeks UV" value={weather?.uvIndex.toString() || "0"} sub={weather && weather.uvIndex > 5 ? "Tinggi" : "Rendah"} />
-                        <ConditionItem icon={Eye} label="Visibilitas" value={`${weather?.visibility} km`} sub="" />
-                        <ConditionItem icon={CloudRain} label="Presipitasi" value={`${weather?.precipitation}%`} sub="" />
+                        <ConditionItem icon={Wind} label="Angin" value={`${weather?.windSpeed ?? '--'} km/h`} sub="BL" />
+                        <ConditionItem icon={Droplets} label="Kelembaban" value={`${weather?.humidity ?? '--'}%`} sub="" />
+                        <ConditionItem icon={Sun} label="Indeks UV" value={weather?.uvIndex?.toString() ?? '0'} sub={weather && weather.uvIndex > 5 ? 'Tinggi' : 'Rendah'} />
+                        <ConditionItem icon={Eye} label="Visibilitas" value={`${weather?.visibility ?? '--'} km`} sub="" />
+                        <ConditionItem icon={CloudRain} label="Presipitasi" value={`${weather?.precipitation ?? '--'}%`} sub="" />
                       </div>
                     </div>
                   </div>
@@ -165,10 +252,13 @@ export default function WeatherPage() {
               )}
 
               {activeView === 'locations' && (
-                <LocationsView key="locations" onSelect={(city) => { fetchWeather(city); setActiveView('dashboard'); }} />
+                <LocationsView
+                  key="locations"
+                  savedCities={savedCities}
+                  onSelect={(city) => { fetchWeather(city); setActiveView('dashboard'); }}
+                  onRemove={removeCity}
+                />
               )}
-
-              {activeView === 'alerts' && <AlertsView key="alerts" />}
               
               {activeView === 'settings' && <SettingsView key="settings" />}
             </AnimatePresence>
@@ -180,7 +270,7 @@ export default function WeatherPage() {
   );
 }
 
-function ConditionItem({ icon: Icon, label, value, sub }: { icon: any, label: string, value: string, sub: string }) {
+function ConditionItem({ icon: Icon, label, value, sub }: { icon: LucideIcon, label: string, value: string, sub: string }) {
   return (
     <div className="flex items-center justify-between group">
       <div className="flex items-center gap-3">
@@ -199,60 +289,56 @@ function ConditionItem({ icon: Icon, label, value, sub }: { icon: any, label: st
 
 /* SIDEBAR VIEWS */
 
-function LocationsView({ onSelect }: { onSelect: (city: string) => void }) {
-  const favorites = [
-    { name: "Jakarta", region: "DKI Jakarta", temp: 32 },
-    { name: "Bandung", region: "Jawa Barat", temp: 24 },
-    { name: "Surabaya", region: "Jawa Timur", temp: 33 },
-    { name: "Bali", region: "Denpasar", temp: 29 },
-  ];
-
+function LocationsView({ savedCities, onSelect, onRemove }: { savedCities: SavedCity[], onSelect: (city: string) => void, onRemove: (city: string) => void }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col gap-8 p-4">
       <div className="flex flex-col gap-2">
         <h2 className="text-4xl font-black uppercase tracking-tighter">Lokasi Disimpan</h2>
-        <p className="text-slate-500 font-bold tracking-[0.2em] text-xs">PINTASAN CEPAT KOTA BESAR</p>
+        <p className="text-slate-500 font-bold tracking-[0.2em] text-xs">
+          {savedCities.length === 0 ? 'BELUM ADA LOKASI TERSIMPAN' : `${savedCities.length} KOTA TERSIMPAN`}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
-        {favorites.map((city) => (
-          <button 
-            key={city.name}
-            onClick={() => onSelect(city.name)}
-            className="glass flex items-center justify-between p-6 rounded-[2rem] hover:bg-white/10 transition-all text-left"
-          >
-            <div className="flex flex-col">
-              <span className="text-xl font-black uppercase text-white">{city.name}</span>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{city.region}</span>
-            </div>
-            <span className="text-3xl font-black text-blue-400">{city.temp}°</span>
-          </button>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function AlertsView() {
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col gap-8 p-4">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-4xl font-black uppercase tracking-tighter text-yellow-500">Peringatan Cuaca</h2>
-        <p className="text-slate-500 font-bold tracking-[0.2em] text-xs">DATA REALTIME DARI SATELIT</p>
-      </div>
-      
-      <div className="glass p-8 rounded-[2rem] border-yellow-500/20 max-w-2xl flex items-start gap-6">
-        <div className="p-4 bg-yellow-500/10 rounded-2xl">
-          <AlertTriangle className="w-8 h-8 text-yellow-500" />
+      {savedCities.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass p-10 rounded-[2rem] max-w-md flex flex-col items-center gap-4 text-center"
+        >
+          <Star className="w-12 h-12 text-slate-700" />
+          <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">Cari kota lalu tekan ★ untuk menyimpannya</p>
+        </motion.div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
+          <AnimatePresence>
+            {savedCities.map((city) => (
+              <motion.div
+                key={city.name}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                layout
+                className="glass flex items-center justify-between p-6 rounded-[2rem] group"
+              >
+                <button
+                  onClick={() => onSelect(city.name)}
+                  className="flex flex-col text-left flex-1"
+                >
+                  <span className="text-xl font-black uppercase text-white group-hover:text-blue-400 transition-colors">{city.name}</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{city.region}</span>
+                </button>
+                <button
+                  onClick={() => onRemove(city.name)}
+                  title="Hapus dari simpanan"
+                  className="p-2 rounded-xl text-slate-600 hover:text-red-400 hover:bg-red-400/10 transition-all ml-3 flex-shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
-        <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-black uppercase text-white">Gelombang Panas Terdeteksi</h3>
-          <p className="text-slate-400 text-sm leading-relaxed">
-            Indeks UV di wilayah Anda saat ini mencapai level 8. Disarankan menggunakan tabir surya dan menghindari paparan matahari langsung hingga jam 16:00.
-          </p>
-          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mt-2">DIPERBARUI 5 MENIT LALU</span>
-        </div>
-      </div>
+      )}
     </motion.div>
   );
 }
@@ -279,7 +365,7 @@ function SettingsView() {
         
         <div className="glass p-6 rounded-3xl flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="p-2 bg-purple-500/10 rounded-xl text-purple-500"><Heart className="w-5 h-5"/></div>
+            <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400"><Star className="w-5 h-5"/></div>
             <span className="font-bold uppercase tracking-widest text-sm">Mode Cinematic</span>
           </div>
           <div className="w-12 h-6 bg-blue-500 rounded-full relative">
