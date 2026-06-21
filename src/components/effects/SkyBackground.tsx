@@ -1,13 +1,13 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
 interface SkyBackgroundProps {
   condition: string;
+  showEffects?: boolean;
 }
 
-export default function SkyBackground({ condition }: SkyBackgroundProps) {
+export default function SkyBackground({ condition, showEffects = true }: SkyBackgroundProps) {
   const lowerCondition = condition.toLowerCase();
   let gradient = "from-slate-900/30 via-slate-950 to-black";
 
@@ -35,29 +35,40 @@ export default function SkyBackground({ condition }: SkyBackgroundProps) {
       {/* Texture Layer */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       
-      {/* Decorative Orbs */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.2, 0.1],
-          x: [0, 50, 0],
-          y: [0, -30, 0]
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-        style={{ willChange: "transform, opacity" }}
-        className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-500/20 blur-[120px] rounded-full transform-gpu"
-      />
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.1, 1],
-          opacity: [0.05, 0.1, 0.05],
-          x: [0, -40, 0],
-          y: [0, 40, 0]
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        style={{ willChange: "transform, opacity" }}
-        className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[100px] rounded-full transform-gpu"
-      />
+      {/* Decorative Orbs — only when Cinematic Mode is on */}
+      <AnimatePresence>
+        {showEffects && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.1, 0.2, 0.1],
+                x: [0, 50, 0],
+                y: [0, -30, 0]
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              style={{ willChange: "transform, opacity" }}
+              className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-500/20 blur-[120px] rounded-full transform-gpu"
+            />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ 
+                scale: [1, 1.1, 1],
+                opacity: [0.05, 0.1, 0.05],
+                x: [0, -40, 0],
+                y: [0, 40, 0]
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              style={{ willChange: "transform, opacity" }}
+              className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[100px] rounded-full transform-gpu"
+            />
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

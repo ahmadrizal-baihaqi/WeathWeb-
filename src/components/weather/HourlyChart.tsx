@@ -3,12 +3,14 @@
 import { motion } from 'framer-motion';
 import { HourlyData } from '@/types/weather';
 import { Cloud, Sun, CloudRain } from 'lucide-react';
+import { TempUnit, convertTemp } from '@/hooks/useSettings';
 
 interface HourlyChartProps {
   hourly: HourlyData[];
+  tempUnit?: TempUnit;
 }
 
-export default function HourlyChart({ hourly }: HourlyChartProps) {
+export default function HourlyChart({ hourly, tempUnit = 'celsius' }: HourlyChartProps) {
   // Guard against empty data
   const dataToProcess = Array.isArray(hourly) ? hourly : [];
   if (dataToProcess.length === 0) {
@@ -103,7 +105,7 @@ export default function HourlyChart({ hourly }: HourlyChartProps) {
               <div key={i} className="flex flex-col items-center gap-2">
                 <span className="text-[10px] font-bold text-slate-500">{h.time}</span>
                 <Icon className="w-4 h-4 text-slate-300" />
-                <span className="text-xs font-bold text-white">{Math.round(h.temp)}°</span>
+                <span className="text-xs font-bold text-white">{convertTemp(Math.round(h.temp), tempUnit)}°</span>
               </div>
             );
           })}

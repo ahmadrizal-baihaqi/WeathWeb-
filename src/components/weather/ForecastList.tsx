@@ -3,24 +3,26 @@
 import { motion } from 'framer-motion';
 import { ForecastDay } from '@/types/weather';
 import { Cloud, Sun, CloudRain } from 'lucide-react';
+import { TempUnit, convertTemp } from '@/hooks/useSettings';
 
 interface ForecastListProps {
   forecast: ForecastDay[];
+  tempUnit?: TempUnit;
 }
 
-export default function ForecastList({ forecast }: ForecastListProps) {
+export default function ForecastList({ forecast, tempUnit = 'celsius' }: ForecastListProps) {
   return (
     <div className="glass p-8 rounded-[2.5rem] h-full flex flex-col justify-between overflow-hidden">
       <div className="grid grid-cols-5 md:grid-cols-5 gap-2 h-full">
         {forecast.map((day, index) => (
-          <ForecastCard key={day.date} day={day} index={index} />
+          <ForecastCard key={day.date} day={day} index={index} tempUnit={tempUnit} />
         ))}
       </div>
     </div>
   );
 }
 
-function ForecastCard({ day, index }: { day: ForecastDay, index: number }) {
+function ForecastCard({ day, index, tempUnit }: { day: ForecastDay; index: number; tempUnit: TempUnit }) {
   const getIcon = (condition: string) => {
     const c = condition.toLowerCase();
     if (c.includes("sunny") || c.includes("clear")) return <Sun className="w-6 h-6 text-yellow-400" />;
@@ -42,8 +44,8 @@ function ForecastCard({ day, index }: { day: ForecastDay, index: number }) {
         {getIcon(day.condition)}
       </div>
       <div className="flex flex-col items-center">
-        <span className="text-sm font-black">{day.maxTemp}°</span>
-        <span className="text-[10px] font-bold text-slate-500">{day.minTemp}°</span>
+        <span className="text-sm font-black">{convertTemp(day.maxTemp, tempUnit)}°</span>
+        <span className="text-[10px] font-bold text-slate-500">{convertTemp(day.minTemp, tempUnit)}°</span>
       </div>
     </motion.div>
   );
