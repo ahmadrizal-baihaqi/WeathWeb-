@@ -54,13 +54,19 @@ export async function getWeatherData(query: string): Promise<WeatherData> {
       precipitation: 5,
       feelsLike: 33,
       icon: "cloudy",
-      forecast: [
-        { date: "Besok", maxTemp: 32, minTemp: 25, condition: "Hujan Ringan", icon: "rain" },
-        { date: "Sen", maxTemp: 31, minTemp: 24, condition: "Cerah Berawan", icon: "cloudy" },
-        { date: "Sel", maxTemp: 33, minTemp: 26, condition: "Cerah", icon: "sunny" },
-        { date: "Rab", maxTemp: 30, minTemp: 24, condition: "Hujan", icon: "rain" },
-        { date: "Kam", maxTemp: 31, minTemp: 25, condition: "Berawan", icon: "cloudy" },
-      ],
+      forecast: Array.from({ length: 6 }).map((_, i) => {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + i);
+        const daysOfWeek = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+        const dayLabel = i === 0 ? "Hari Ini" : i === 1 ? "Besok" : daysOfWeek[targetDate.getDay()];
+        return {
+          date: dayLabel,
+          maxTemp: 30 + Math.sin(i) * 3,
+          minTemp: 23 + Math.cos(i) * 2,
+          condition: i % 2 === 0 ? "Cerah Berawan" : "Hujan Ringan",
+          icon: i % 2 === 0 ? "cloudy" : "rain"
+        };
+      }),
       hourly: mockHourly,
       region: mockCity === "Bandung" ? "Jawa Barat" : mockCity === "Surabaya" ? "Jawa Timur" : mockCity === "Bali" ? "Denpasar" : "DKI Jakarta",
       tzId: "Asia/Jakarta"
@@ -69,18 +75,24 @@ export async function getWeatherData(query: string): Promise<WeatherData> {
 
   try {
     // Added lang=id for Indonesian response from API
-    const res = await fetch(`${BASE_URL}/forecast.json?key=${API_KEY}&q=${query}&days=5&aqi=no&alerts=yes&lang=id`);
+    const res = await fetch(`${BASE_URL}/forecast.json?key=${API_KEY}&q=${query}&days=6&aqi=no&alerts=yes&lang=id`);
     const data = await res.json();
 
     if (!res.ok) throw new Error(data.error?.message || "Gagal mengambil data cuaca");
 
-    const forecast: ForecastDay[] = data.forecast.forecastday.map((day: APIDay) => ({
-      date: new Date(day.date).toLocaleDateString('id-ID', { weekday: 'short' }),
-      maxTemp: Math.round(day.day.maxtemp_c),
-      minTemp: Math.round(day.day.mintemp_c),
-      condition: day.day.condition.text,
-      icon: day.day.condition.icon
-    }));
+    const forecast: ForecastDay[] = data.forecast.forecastday.map((day: APIDay, idx: number) => {
+      const dateObj = new Date(day.date);
+      let dayLabel = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
+      if (idx === 0) dayLabel = "Hari Ini";
+      else if (idx === 1) dayLabel = "Besok";
+      return {
+        date: dayLabel,
+        maxTemp: Math.round(day.day.maxtemp_c),
+        minTemp: Math.round(day.day.mintemp_c),
+        condition: day.day.condition.text,
+        icon: day.day.condition.icon
+      };
+    });
 
     const hourly: HourlyData[] = data.forecast.forecastday[0].hour.map((h: APIHour) => ({
       time: h.time.split(' ')[1],

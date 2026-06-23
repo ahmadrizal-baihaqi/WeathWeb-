@@ -244,7 +244,7 @@ export default function WeatherPage() {
                   <div className="flex flex-col lg:flex-row gap-6 pb-10">
                     <div className="w-full lg:w-[35%] flex flex-col gap-3">
                       <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] px-4">Ramalan 5 Hari</h3>
-                      <ForecastList forecast={weather?.forecast || []} tempUnit={settings.tempUnit} />
+                      <ForecastList forecast={weather?.forecast ? weather.forecast.slice(1, 6) : []} tempUnit={settings.tempUnit} />
                     </div>
                     <div className="flex-1 flex flex-col gap-3">
                       <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] px-4">Tren Per Jam</h3>
