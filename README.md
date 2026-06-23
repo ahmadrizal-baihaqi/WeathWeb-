@@ -1,6 +1,6 @@
 # WeathWeb - Modern & Premium Weather Dashboard 🌤️
 
-**WeathWeb** adalah aplikasi dashboard cuaca modern yang dibangun menggunakan **Next.js 16 (App Router)**, **Tailwind CSS v4**, dan **Framer Motion**. Aplikasi ini dirancang untuk menyajikan data cuaca real-time dengan antarmuka pengguna (UI/UX) premium, transisi animasi halus, serta fitur personalisasi yang di-persistensikan secara lokal.
+**WeathWeb** adalah aplikasi dashboard cuaca modern yang dibangun menggunakan **Next.js 16 (App Router)**, **Tailwind CSS v4**, dan **Framer Motion**. Aplikasi ini dirancang untuk menyajikan data cuaca dengan antarmuka yang elegan, responsif, dan penuh animasi menarik.
 
 ---
 
@@ -42,7 +42,17 @@ Dapat diakses melalui menu ikon roda gigi di navigasi samping. Konfigurasi tersu
 
 ## 🛠️ Stack Teknologi
 
+[![Next.js](https://img.shields.io/badge/Next.js-16-000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Latest-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-Latest-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-Latest-000000?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Lucide React](https://img.shields.io/badge/Lucide%20React-Icons-FF6B35?style=for-the-badge&logoColor=white)](https://lucide.dev/)
+[![WeatherAPI](https://img.shields.io/badge/WeatherAPI-Data-4ECDC4?style=for-the-badge&logoColor=white)](https://www.weatherapi.com/)
+
+### Detail Stack:
 * **Framework**: [Next.js 16 (App Router)](https://nextjs.org/) (dengan Turbopack untuk loading dev yang instan)
+* **Bahasa**: [TypeScript](https://www.typescriptlang.org/) (Type-safe development)
 * **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & Vanilla CSS (GPU-accelerated smooth scrolling)
 * **Animasi**: [Framer Motion](https://www.framer.com/motion/) (Loader SVG awan, transisi halaman, & efek cinematic orbs)
 * **Ikonografi**: [Lucide React Icons](https://lucide.dev/)
